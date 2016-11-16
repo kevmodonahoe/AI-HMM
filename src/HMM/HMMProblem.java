@@ -22,6 +22,11 @@ public class HMMProblem {
         filtering(beliefState, moves, 0);
     }
 
+    /*
+        The filtering method computes a new belief state for each color reading, given all the evidence up that point.
+        This recursive function uses prediction and update functions to calculate the new distribution, and prints
+        out the results on each iteration.
+     */
     public void filtering(BeliefState currBeliefState, int[] moves, int iteration) {
         if(iteration == moves.length) {
             return;
@@ -39,6 +44,59 @@ public class HMMProblem {
         filtering(updatedBeliefState, moves, iteration);
     }
 
+    /*
+       Loop through each column of the transition matrix, and multiply it by the previous probability distribution
+       for the location.
+
+       | c1  | c2  | c3  |     | c16 |
+       |     |     |     | ... |     |
+       |     |     |     |     |     |
+       |     |     |     |     |     |
+
+       (c1 * x1) + (c2 * x2) + ...., where c1 equals the first column of the transition matrix, and
+       x1 equals the probability distribution of the location x1 up to the current moment.
+
+       This represents: P(X_(t+1) | e_(1: t))
+
+    */
+    public BeliefState predictionStep(BeliefState beliefState) {
+        BeliefState newBeliefState = new BeliefState();
+
+        for(int c=0; c<16; c++) {
+            Double sum = 0.0;
+            for(int r=0; r<16; r++) {
+                Double matrixValue = transitionMatrix.matrix[r][c].prob;
+                Double product = matrixValue * beliefState.state.get(c);
+                sum += product;
+            }
+            newBeliefState.state.add(sum);
+        }
+
+        return newBeliefState;
+    }
+
+
+    /*
+        Update step of filtering.
+        Given the belief state and the sensor model, performs vector multiplication to calculate the new distribution,
+        and then calls the normalize function on that distribution.
+     */
+    public BeliefState updateStep(BeliefState prediction, ArrayList<Double> sensorModel) {
+        BeliefState updatedBeliefState = new BeliefState();
+
+        for(int i=0; i<16; i++) {
+            Double product = prediction.state.get(i) * sensorModel.get(i);
+            updatedBeliefState.state.add(product);
+        }
+
+        BeliefState normalizedBeliefState = normalizeState(updatedBeliefState);
+        return normalizedBeliefState;
+    }
+
+
+    /*
+        Normalizes the distribution so that the values add up to 1.
+     */
     public BeliefState normalizeState(BeliefState beliefState) {
         BeliefState normalizedState = new BeliefState();
 
@@ -53,18 +111,6 @@ public class HMMProblem {
         }
 
         return normalizedState;
-    }
-
-    public BeliefState updateStep(BeliefState prediction, ArrayList<Double> sensorModel) {
-        BeliefState updatedBeliefState = new BeliefState();
-
-        for(int i=0; i<16; i++) {
-            Double product = prediction.state.get(i) * sensorModel.get(i);
-            updatedBeliefState.state.add(product);
-        }
-
-        BeliefState normalizedBeliefState = normalizeState(updatedBeliefState);
-        return normalizedBeliefState;
     }
 
     /*
@@ -95,54 +141,7 @@ public class HMMProblem {
 
         return sensorModel;
     }
-
-    /*
-       Loop through each column of the transition matrix, and multiply it by the previous probability distribution
-       for the location.
-
-       | c1  | c2  | c3  |     | c16 |
-       |     |     |     | ... |     |
-       |     |     |     |     |     |
-       |     |     |     |     |     |
-
-       (c1 * x1) + (c2 * x2) + ...., where c1 equals the first column of the transition matrix, and
-       x1 equals the probability distribution of the location x1 up to the current moment.
-
-       This represents: P(X_(t+1) | e_(1: t))
-
-        */
-    public BeliefState predictionStep(BeliefState beliefState) {
-        BeliefState newBeliefState = new BeliefState();
-
-        for(int c=0; c<16; c++) {
-            Double sum = 0.0;
-            for(int r=0; r<16; r++) {
-                Double matrixValue = transitionMatrix.matrix[r][c].prob;
-                Double product = matrixValue * beliefState.state.get(c);
-                sum += product;
-            }
-            newBeliefState.state.add(sum);
-        }
-
-        return newBeliefState;
-    }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

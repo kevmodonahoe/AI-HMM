@@ -1,0 +1,7 @@
+To run the program, Run the HMMDriver.java class. You will them be prompted with a couple questions, including how many walls you'd
+like to have in your 4x4 map, and the move sequence you'd like the robot to attempt (4 moves total).
+
+Then, the console will display the belief state after each move, the map including the robots position, wall positions, and
+location colors, and which the direction the robot attempted to move on that turn.
+
+ Enjoy!!

@@ -66,6 +66,7 @@ public class Robot {
                 dir = "West";
                 break;
             default:
+                dir = direction + " is an invalid Direction - so robot stayed in place!";
                 break;
         }
         return dir;

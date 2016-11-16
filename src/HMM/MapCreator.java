@@ -16,17 +16,13 @@ public class MapCreator {
     }
     public class MapNode {
         boolean isWall;
-        int depth;
-        boolean isRobot;
         int color;
         int index;
 
         // 0: red, 1: green, 2: blue, 3: yellow
-        public MapNode(int x, int y, int c, int i, boolean isWall) {
+        public MapNode(int c, int i, boolean isWall) {
             this.color = c;
             this.index = i;
-            depth = 0;
-            this.isRobot = false;
             this.isWall = isWall;
         }
     }
@@ -37,15 +33,19 @@ public class MapCreator {
 
         public Map() {
             this.map = new MapNode[rows][columns];
-            startNode = new MapNode(0, 0, 0, 0, false);
+            startNode = new MapNode(0, 0, false);
         }
 
+        /*
+            Initializes the 4x4 map. Depending on how many walls the user decides to use, that number
+            of walls are generated in random locations in the map.
+         */
         public MapNode[][] initializeMap() {
             int color = 0;
             int index = 0;
             for(int r=0; r<rows; r++) {
                 for (int c = 0; c < columns; c++) {
-                    this.map[r][c] = new MapNode(r, c, color, index, false);
+                    this.map[r][c] = new MapNode(color, index, false);
                     index++;
                 }
                 if (color == 3) {
@@ -55,11 +55,16 @@ public class MapCreator {
                 }
             }
 
-
             for(int i=0; i<numWalls; i++) {
                 Random rand = new Random();
                 int r = rand.nextInt(3) + 1;
                 int c = rand.nextInt(3) + 0;
+
+                while(map[r][c].isWall) {
+                    r = rand.nextInt(3) + 1;
+                    c = rand.nextInt(3) + 0;
+                }
+
                 map[r][c].isWall = true;
                 map[r][c].color = -1;
             }
